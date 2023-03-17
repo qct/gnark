@@ -1,6 +1,7 @@
 package hint
 
 import (
+	"errors"
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 	"github.com/consensys/gnark/std/gkr/hash"
 	"math/big"
@@ -44,12 +45,87 @@ func Self(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
 }
 
 func MIMC2Elements(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
-	newState := new(fr.Element).SetBigInt(inputs[1])
-	block := new(fr.Element).SetBigInt(inputs[0])
-	oldState := new(fr.Element).SetBigInt(inputs[1])
+	newState := new(fr.Element).SetBigInt(inputs[0])
+	block := new(fr.Element).SetBigInt(inputs[1])
+	oldState := new(fr.Element).SetBigInt(inputs[0])
 	block.Sub(block, oldState)
 	hash.MimcPermutationInPlace(newState, *block)
 	bytes := newState.Bytes()
 	results[0].SetBytes(bytes[:])
 	return nil
+}
+
+func MIMCElements(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
+	if len(inputs) == 0 || len(results) == 0 {
+		return errors.New("empty input or output")
+	}
+
+	newState := new(fr.Element).SetBigInt(inputs[0])
+	for i := 1; i < len(inputs); i++ {
+		block := new(fr.Element).SetBigInt(inputs[i])
+		oldState := new(fr.Element).Set(newState)
+		block.Sub(block, oldState)
+		hash.MimcPermutationInPlace(newState, *block)
+	}
+
+	bytes := newState.Bytes()
+	results[0].SetBytes(bytes[:])
+
+	return nil
+}
+
+func ComputeMimc2Hash(i1, i2 *big.Int) []byte {
+	newState := new(fr.Element).SetBigInt(i2)
+	block := new(fr.Element).SetBigInt(i1)
+	oldState := new(fr.Element).SetBigInt(i2)
+	block.Sub(block, oldState)
+	hash.MimcPermutationInPlace(newState, *block)
+	bytes := newState.Bytes()
+	return bytes[:]
+}
+
+func ComputeMimcHash(inputs ...*big.Int) []byte {
+	if len(inputs) == 0 {
+		return nil
+	}
+
+	newState := new(fr.Element).SetBigInt(inputs[0])
+	for i := 1; i < len(inputs); i++ {
+		block := new(fr.Element).SetBigInt(inputs[i])
+		oldState := new(fr.Element).Set(newState)
+		block.Sub(block, oldState)
+		hash.MimcPermutationInPlace(newState, *block)
+	}
+
+	res := newState.Bytes()
+	return res[:]
+}
+
+func MIMCFrElements(msg []*fr.Element) *fr.Element {
+	newState := new(fr.Element).Set(msg[0])
+	for i := 1; i < len(msg); i++ {
+		block := new(fr.Element).Set(msg[i])
+		oldState := new(fr.Element).Set(newState)
+		block.Sub(block, oldState)
+		hash.MimcPermutationInPlace(newState, *block)
+	}
+
+	return newState
+}
+
+func ComputeGMimcBytes(inputs ...[]byte) []byte {
+	if len(inputs) == 0 {
+		return nil
+	}
+
+	newState := new(fr.Element).SetBytes(inputs[0])
+	for i := 1; i < len(inputs); i++ {
+		block := new(fr.Element).SetBytes(inputs[i])
+		oldState := new(fr.Element).Set(newState)
+		block.Sub(block, oldState)
+		hash.MimcPermutationInPlace(newState, *block)
+	}
+
+	res := newState.Bytes()
+	return res[:]
 }

@@ -288,6 +288,33 @@ func Setup(r1cs constraint.ConstraintSystem) (ProvingKey, VerifyingKey, error) {
 	}
 }
 
+func SetupWithDump(r1cs frontend.CompiledConstraintSystem, session string) error {
+
+	switch _r1cs := r1cs.(type) {
+	case *backend_bn254.R1CS:
+		if err := groth16_bn254.SetupWithDump(_r1cs, session); err != nil {
+			return err
+		}
+		return nil
+	default:
+		panic("unrecognized R1CS curve type")
+	}
+}
+
+func SetupLazyWithDump(r1cs frontend.CompiledConstraintSystem, session string) error {
+
+	switch _r1cs := r1cs.(type) {
+	case *backend_bn254.R1CS:
+		_r1cs.Lazify()
+		if err := groth16_bn254.SetupLazyWithDump(_r1cs, session); err != nil {
+			return err
+		}
+		return nil
+	default:
+		panic("unrecognized R1CS curve type")
+	}
+}
+
 // DummySetup create a random ProvingKey with provided R1CS
 // it doesn't return a VerifyingKey and is use for benchmarking or test purposes only.
 func DummySetup(r1cs constraint.ConstraintSystem) (ProvingKey, error) {

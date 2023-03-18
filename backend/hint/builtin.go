@@ -45,9 +45,12 @@ func Self(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
 }
 
 func MIMC2Elements(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
-	newState := new(fr.Element).SetBigInt(inputs[0])
-	block := new(fr.Element).SetBigInt(inputs[1])
-	oldState := new(fr.Element).SetBigInt(inputs[0])
+	if len(inputs) < 2 {
+		return errors.New("MIMCElements requires at least two input elementss")
+	}
+	newState := new(fr.Element).SetBigInt(inputs[1])
+	block := new(fr.Element).SetBigInt(inputs[0])
+	oldState := new(fr.Element).SetBigInt(inputs[1])
 	block.Sub(block, oldState)
 	hash.MimcPermutationInPlace(newState, *block)
 	bytes := newState.Bytes()
@@ -56,25 +59,33 @@ func MIMC2Elements(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error 
 }
 
 func MIMCElements(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
-	if len(inputs) == 0 || len(results) == 0 {
-		return errors.New("empty input or output")
+	if len(inputs) < 2 {
+		return errors.New("MIMCHash requires at least two input elements")
 	}
 
-	newState := new(fr.Element).SetBigInt(inputs[0])
-	for i := 1; i < len(inputs); i++ {
-		block := new(fr.Element).SetBigInt(inputs[i])
-		oldState := new(fr.Element).Set(newState)
-		block.Sub(block, oldState)
-		hash.MimcPermutationInPlace(newState, *block)
+	var err error
+
+	// Compute the hash for the first pair of input elements
+	err = MIMC2Elements(curveID, inputs[:2], results)
+	if err != nil {
+		return err
 	}
 
-	bytes := newState.Bytes()
-	results[0].SetBytes(bytes[:])
+	// Compute the hash for the remaining input elements
+	for i := 2; i < len(inputs); i++ {
+		err = MIMC2Elements(curveID, []*big.Int{results[0], inputs[i]}, results)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Copy the final hash result to the output parameter
+	results[0].SetBytes(results[0].Bytes())
 
 	return nil
 }
 
-func ComputeMimc2Hash(i1, i2 *big.Int) []byte {
+func GMimcBigInt(i1, i2 *big.Int) []byte {
 	newState := new(fr.Element).SetBigInt(i2)
 	block := new(fr.Element).SetBigInt(i1)
 	oldState := new(fr.Element).SetBigInt(i2)
@@ -84,48 +95,50 @@ func ComputeMimc2Hash(i1, i2 *big.Int) []byte {
 	return bytes[:]
 }
 
-func ComputeMimcHash(inputs ...*big.Int) []byte {
-	if len(inputs) == 0 {
+func GMimcBigInts(inputs ...*big.Int) []byte {
+	if len(inputs) < 2 {
 		return nil
 	}
 
-	newState := new(fr.Element).SetBigInt(inputs[0])
-	for i := 1; i < len(inputs); i++ {
-		block := new(fr.Element).SetBigInt(inputs[i])
-		oldState := new(fr.Element).Set(newState)
-		block.Sub(block, oldState)
-		hash.MimcPermutationInPlace(newState, *block)
-	}
+	// Compute the hash for the first pair of input elements
+	hashBytes := GMimcBigInt(inputs[0], inputs[1])
 
-	res := newState.Bytes()
-	return res[:]
+	// Compute the hash for the remaining input elements
+	for i := 2; i < len(inputs); i++ {
+		hashBytes = GMimcBigInt(big.NewInt(0).SetBytes(hashBytes), inputs[i])
+	}
+	return hashBytes
 }
 
-func MIMCFrElements(msg []*fr.Element) *fr.Element {
-	newState := new(fr.Element).Set(msg[0])
-	for i := 1; i < len(msg); i++ {
-		block := new(fr.Element).Set(msg[i])
-		oldState := new(fr.Element).Set(newState)
-		block.Sub(block, oldState)
-		hash.MimcPermutationInPlace(newState, *block)
-	}
-
-	return newState
-}
-
-func ComputeGMimcBytes(inputs ...[]byte) []byte {
-	if len(inputs) == 0 {
+func GMimcElements(msg []*fr.Element) *fr.Element {
+	if len(msg) < 2 {
 		return nil
 	}
 
-	newState := new(fr.Element).SetBytes(inputs[0])
-	for i := 1; i < len(inputs); i++ {
-		block := new(fr.Element).SetBytes(inputs[i])
-		oldState := new(fr.Element).Set(newState)
-		block.Sub(block, oldState)
-		hash.MimcPermutationInPlace(newState, *block)
+	// Convert msg []*fr.Element to inputs ...[]byte
+	inputs := make([][]byte, len(msg))
+	for i, e := range msg {
+		res := e.Bytes()
+		inputs[i] = res[:]
 	}
 
-	res := newState.Bytes()
-	return res[:]
+	// Compute the hash of the inputs
+	hashBytes := GMimcBytes(inputs...)
+
+	// Convert the hash to an *fr.Element
+	var hashFr fr.Element
+	hashFr.SetBytes(hashBytes)
+	return &hashFr
+}
+
+func GMimcBytes(inputs ...[]byte) []byte {
+	if len(inputs) < 2 {
+		return nil
+	}
+
+	bigIntInputs := make([]*big.Int, len(inputs))
+	for i, input := range inputs {
+		bigIntInputs[i] = new(big.Int).SetBytes(input)
+	}
+	return GMimcBigInts(bigIntInputs...)
 }

@@ -19,6 +19,11 @@ type poseidonCircuit4 struct {
 	Data [4]frontend.Variable
 }
 
+type poseidonCircuit13 struct {
+	Hash frontend.Variable `gnark:"data,public"`
+	Data [13]frontend.Variable
+}
+
 type poseidonCircuit24 struct {
 	Hash frontend.Variable `gnark:"data,public"`
 	Data [24]frontend.Variable
@@ -41,6 +46,12 @@ func (circuit *poseidonCircuit2) Define(api frontend.API) error {
 }
 
 func (circuit *poseidonCircuit4) Define(api frontend.API) error {
+	result := Poseidon(api, circuit.Data[:]...)
+	api.AssertIsEqual(result, circuit.Hash)
+	return nil
+}
+
+func (circuit *poseidonCircuit13) Define(api frontend.API) error {
 	result := Poseidon(api, circuit.Data[:]...)
 	api.AssertIsEqual(result, circuit.Hash)
 	return nil
@@ -85,6 +96,28 @@ func TestPoseidon4(t *testing.T) {
 
 	// Test completeness
 	size := 4
+	for i := 0; i < size; i++ {
+		witness.Data[i] = frontend.Variable(i + 1)
+	}
+	witness.Hash = hash
+	assert.SolvingSucceeded(&circuit, &witness, test.WithCurves(ecc.BN254))
+
+	// Test soundness
+	for i := 0; i < size; i++ {
+		wrongWitness.Data[i] = frontend.Variable(i + 2)
+	}
+	wrongWitness.Hash = hash
+	assert.SolvingFailed(&circuit, &wrongWitness, test.WithCurves(ecc.BN254))
+
+}
+
+func TestPoseidon13(t *testing.T) {
+	assert := test.NewAssert(t)
+	var circuit, witness, wrongWitness poseidonCircuit13
+	hash, _ := new(big.Int).SetString("04ea9108a1551c780a7408570bdeaa3a0294b01f21198b72ff01545a60da677f", 16)
+
+	// Test completeness
+	size := 13
 	for i := 0; i < size; i++ {
 		witness.Data[i] = frontend.Variable(i + 1)
 	}

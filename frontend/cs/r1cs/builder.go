@@ -450,29 +450,29 @@ func (cs *r1cs) Compile() (frontend.CompiledConstraintSystem, error) {
 		}
 		hInputVids, _ := cs.toVariables(hInputsVariable...)
 
-		hOutputVid := compiled.LinearExpression{
-			compiled.Pack(h.Wires[0], compiled.CoeffIdOne, schema.Internal),
-		}
+		//hOutputVid := compiled.LinearExpression{
+		//	compiled.Pack(h.Wires[0], compiled.CoeffIdOne, schema.Internal),
+		//}
 		// 1 << bN is the total hashes size and shift of two inputs
 		shift := 1 << cs.config.GkrBN
 		li0 := cs.GkrMeta.GKRInputTables[i]
 		li1 := cs.GkrMeta.GKRInputTables[i+shift]
 		// we need to contraints from inputs to outpus
 		for shiftI := 1; shiftI < 7; shiftI++ {
-			li2l := cs.GkrMeta.GKRInputTables[i+2*shiftI*shift]
-			li2r := cs.GkrMeta.GKRInputTables[i+2*shiftI*shift+1]
-			lo2 := cs.GkrMeta.GKROutputTables[i+(shiftI-1)*shift]
-			cs.addConstraint(compiled.R1C{L: cs.one(), R: lo2.Clone(), O: li2l.Clone()})
-			cs.addConstraint(compiled.R1C{L: cs.one(), R: lo2.Clone(), O: li2r.Clone()})
+			//li2l := cs.GkrMeta.GKRInputTables[i+2*shiftI*shift]
+			//li2r := cs.GkrMeta.GKRInputTables[i+2*shiftI*shift+1]
+			//lo2 := cs.GkrMeta.GKROutputTables[i+(shiftI-1)*shift]
+			//cs.addConstraint(compiled.R1C{L: cs.one(), R: lo2.Clone(), O: li2l.Clone()})
+			//cs.addConstraint(compiled.R1C{L: cs.one(), R: lo2.Clone(), O: li2r.Clone()})
 		}
 
-		lo := cs.GkrMeta.GKROutputTables[i+shift*6]
+		//lo := cs.GkrMeta.GKROutputTables[i+shift*6]
 		// input constraint
 		cs.addConstraint(compiled.R1C{L: cs.one(), R: hInputVids[0].Clone(), O: li0.Clone()})
 		cs.addConstraint(compiled.R1C{L: cs.one(), R: hInputVids[1].Clone(), O: li1.Clone()})
 
 		// output constraint
-		cs.addConstraint(compiled.R1C{L: cs.one(), R: hOutputVid.Clone(), O: lo.Clone()})
+		//cs.addConstraint(compiled.R1C{L: cs.one(), R: hOutputVid.Clone(), O: lo.Clone()})
 	}
 	res.Constraints = cs.Constraints
 

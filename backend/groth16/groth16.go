@@ -373,7 +373,7 @@ func SetupLazyWithDump(r1cs frontend.CompiledConstraintSystem, session string) e
 
 	switch _r1cs := r1cs.(type) {
 	case *backend_bn254.R1CS:
-		//_r1cs.Lazify()
+		_r1cs.Lazify()
 		if err := groth16_bn254.SetupLazyWithDump(_r1cs, session); err != nil {
 			return err
 		}

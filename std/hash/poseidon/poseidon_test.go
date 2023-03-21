@@ -114,7 +114,7 @@ func TestPoseidon4(t *testing.T) {
 func TestPoseidon13(t *testing.T) {
 	assert := test.NewAssert(t)
 	var circuit, witness, wrongWitness poseidonCircuit13
-	hash, _ := new(big.Int).SetString("1148AAEF609AA338B27DAFD89BB98862D8BB2B429ACEAC47D86206154FFE053D", 16)
+	hash, _ := new(big.Int).SetString("04ea9108a1551c780a7408570bdeaa3a0294b01f21198b72ff01545a60da677f", 16)
 
 	// Test completeness
 	size := 13

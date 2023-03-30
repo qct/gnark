@@ -42,7 +42,7 @@ func MIMC2Elements(q *big.Int, inputs []*big.Int, results []*big.Int) error {
 	return nil
 }
 
-func MIMCElements(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
+func MIMCElements(q *big.Int, inputs []*big.Int, results []*big.Int) error {
 	if len(inputs) < 2 {
 		return errors.New("MIMCHash requires at least two input elements")
 	}
@@ -50,14 +50,14 @@ func MIMCElements(curveID ecc.ID, inputs []*big.Int, results []*big.Int) error {
 	var err error
 
 	// Compute the hash for the first pair of input elements
-	err = MIMC2Elements(curveID, inputs[:2], results)
+	err = MIMC2Elements(q, inputs[:2], results)
 	if err != nil {
 		return err
 	}
 
 	// Compute the hash for the remaining input elements
 	for i := 2; i < len(inputs); i++ {
-		err = MIMC2Elements(curveID, []*big.Int{results[0], inputs[i]}, results)
+		err = MIMC2Elements(q, []*big.Int{results[0], inputs[i]}, results)
 		if err != nil {
 			return err
 		}

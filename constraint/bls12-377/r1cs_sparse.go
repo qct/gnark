@@ -460,3 +460,19 @@ func (cs *SparseR1CS) ReadFrom(r io.Reader) (int64, error) {
 
 	return int64(decoder.NumBytesRead()), nil
 }
+
+func (cs *SparseR1CS) LoadFromSplitBinaryConcurrent(session string, constraints int, size int, cpu int) {
+	panic("not implemented")
+}
+
+func (cs *SparseR1CS) LoadFromSplitConcurrent(session string, constraints int, size int, cpu int) {
+	panic("not implemented")
+}
+
+func (cs *SparseR1CS) SplitDump(session string, batchSize int) error {
+	panic("not implemented")
+}
+
+func (cs *SparseR1CS) SplitDumpBinary(session string, batchSize int) error {
+	panic("not implemented")
+}

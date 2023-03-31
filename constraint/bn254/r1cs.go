@@ -50,9 +50,9 @@ type R1CS struct {
 	arithEngine
 }
 
-var GKRWitnessGeneratorHandler func(id ecc.ID, inputs [][]fr.Element, bN, batchSize, initialLength int) (values []fr.Element, startLength, endLength int)
+var GKRWitnessGeneratorHandler func(id ecc.ID, inputs [][]fr.Element, bN, batchSize, initialLength int, initialHash *fr.Element) (values []fr.Element, startLength, endLength int)
 
-func RegisterGKRWitnessGeneratorHandler(f func(id ecc.ID, inputs [][]fr.Element, bN, batchSize, initialLength int) (values []fr.Element, startLength, endLength int)) {
+func RegisterGKRWitnessGeneratorHandler(f func(id ecc.ID, inputs [][]fr.Element, bN, batchSize, initialLength int, initialHash *fr.Element) (values []fr.Element, startLength, endLength int)) {
 	GKRWitnessGeneratorHandler = f
 }
 
@@ -106,7 +106,8 @@ func (cs *R1CS) AddStaticConstraints(key string, constraintPos int, finished boo
 		count := len(cs.StaticConstraints[key].StaticR1CS)
 		inputConstraintCount := cs.StaticConstraints[key].InputConstraintsThreshold
 		// constraintPos - count is the start constraint of the inputs
-		inputConstraints := cs.Constraints[constraintPos-count : constraintPos-count+inputConstraintCount]
+		inputConstraints := make([]constraint.R1C, inputConstraintCount)
+		copy(inputConstraints, cs.Constraints[constraintPos-count:constraintPos-count+inputConstraintCount])
 		shift := nbVariables - cs.StaticConstraints[key].NbVariables
 		input := constraint.NewLazyInputs(key, inputConstraints, constraintPos-count, count, len(expressions), shift)
 		cs.LazyCons = append(cs.LazyCons, input)
@@ -414,7 +415,9 @@ func (cs *R1CS) assignGKRProofs(s *solution) {
 		inputs[0][inputsCovered+shift].SetBigInt(s.MIMCHintsInputs[i][1])
 		inputsCovered++
 	}
-	values, startLen, endLen := GKRWitnessGeneratorHandler(cs.CurveID(), inputs, bN, batchSize, s.InitialValuesLength)
+	initialHash := s.values[cs.CommitmentInfo.CommitmentIndex]
+
+	values, startLen, endLen := GKRWitnessGeneratorHandler(cs.CurveID(), inputs, bN, batchSize, s.InitialValuesLength, &initialHash)
 	copy(s.values[startLen:endLen], values)
 	// from here we are using gkr inputs
 	// inputs, batchSize, bN, initial_length

@@ -23,10 +23,7 @@ func (g *GkrCircuit) AllocateGKRCircuit(bN int) {
 }
 
 func (g *GkrCircuit) AssertValid(api frontend.API, committedVariable ...frontend.Variable) error {
-	initialHash, err := api.Compiler().Commit(committedVariable...)
-	if err != nil {
-		return err
-	}
+	initialHash := 0
 	qPrimeInitial, qInitial := gkr.GetInitialQPrimeAndQAndInitialHash(api, g[0].bN, 0, initialHash)
 	for _, c := range g {
 		c.Proof.AssertValid(api, c.Circuit, c.VInput, c.VOutput, qPrimeInitial, qInitial)

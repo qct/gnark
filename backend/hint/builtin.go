@@ -83,7 +83,7 @@ func MIMCElements(q *big.Int, inputs []*big.Int, results []*big.Int) error {
 
 func GMimcBigInt(i1, i2 *big.Int) []byte {
 	newState := new(fr.Element).SetBigInt(i2)
-	block := new(fr.Element).SetBigInt(i1)
+	block := new(fr.Element).SetBigInt(new(big.Int).Add(i1, i2))
 	oldState := new(fr.Element).SetBigInt(i2)
 	block.Sub(block, oldState)
 	hash.MimcPermutationInPlace(newState, *block)

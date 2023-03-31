@@ -415,9 +415,9 @@ func (cs *R1CS) assignGKRProofs(s *solution) {
 		inputs[0][inputsCovered+shift].SetBigInt(s.MIMCHintsInputs[i][1])
 		inputsCovered++
 	}
-	initialHash := s.values[cs.CommitmentInfo.CommitmentIndex]
+	initialHash := new(fr.Element).SetUint64(0)
 
-	values, startLen, endLen := GKRWitnessGeneratorHandler(cs.CurveID(), inputs, bN, batchSize, s.InitialValuesLength, &initialHash)
+	values, startLen, endLen := GKRWitnessGeneratorHandler(cs.CurveID(), inputs, bN, batchSize, s.InitialValuesLength, initialHash)
 	copy(s.values[startLen:endLen], values)
 	// from here we are using gkr inputs
 	// inputs, batchSize, bN, initial_length

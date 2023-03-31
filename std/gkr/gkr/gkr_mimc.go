@@ -5,7 +5,6 @@ import (
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/gkr/snark/gkr"
 	"github.com/consensys/gnark/std/gkr/snark/polynomial"
-	"github.com/consensys/gnark/std/hash/poseidon"
 )
 
 type GkrCircuitSlice struct {
@@ -24,7 +23,7 @@ func (g *GkrCircuit) AllocateGKRCircuit(bN int) {
 }
 
 func (g *GkrCircuit) AssertValid(api frontend.API, committedVariable ...frontend.Variable) error {
-	initialHash := poseidon.Poseidon(api, committedVariable...)
+	initialHash := 0
 	qPrimeInitial, qInitial := gkr.GetInitialQPrimeAndQAndInitialHash(api, g[0].bN, 0, initialHash)
 	for _, c := range g {
 		c.Proof.AssertValid(api, c.Circuit, c.VInput, c.VOutput, qPrimeInitial, qInitial)

@@ -1,6 +1,8 @@
 package sumcheck
 
 import (
+	"fmt"
+	fiatshamir "github.com/consensys/gnark-crypto/fiat-shamir"
 	"github.com/consensys/gnark/std/gkr/common"
 	"github.com/consensys/gnark/std/gkr/polynomial"
 
@@ -11,7 +13,7 @@ import (
 type Verifier struct{}
 
 // Verify returns true if and only the sumcheck proof is valid
-func (v Verifier) Verify(claim fr.Element, proof Proof, bN, bG int) (result bool, qPrime, qL, qR []fr.Element, finalClaim fr.Element) {
+func (v Verifier) Verify(claim fr.Element, proof Proof, bN, bG, layers int, transcript *fiatshamir.Transcript) (result bool, qPrime, qL, qR []fr.Element, finalClaim fr.Element) {
 	// Initalize the structures
 	challenges := make([]fr.Element, len(proof.PolyCoeffs))
 	var expectedValue fr.Element = claim
@@ -28,7 +30,8 @@ func (v Verifier) Verify(claim fr.Element, proof Proof, bN, bG int) (result bool
 			return false, nil, nil, nil, [4]uint64{0, 0, 0, 0}
 		}
 		// expectedValue = P_i(r)
-		r = common.GetChallenge(proof.PolyCoeffs[i])
+
+		r = common.GetChallengeByTranscript(proof.PolyCoeffs[i], transcript, fmt.Sprintf("layers.%d.hpolys.%d", layers, i))
 
 		challenges[i] = r
 		expectedValue = polynomial.EvaluatePolynomial(proof.PolyCoeffs[i], r)

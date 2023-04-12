@@ -975,12 +975,16 @@ func (cs *R1CS) LoadFromSplitBinaryConcurrent(session string, N, batchSize, NCor
 					cs.R1CSCore.System.GnarkVersion = cs2.R1CSCore.System.GnarkVersion
 					cs.R1CSCore.System.ScalarField = cs2.R1CSCore.System.ScalarField
 					cs.R1CSCore.System.NbInternalVariables = cs2.R1CSCore.System.NbInternalVariables
-					cs.R1CSCore.System.Public = cs2.R1CSCore.System.Public           // Todo
-					cs.R1CSCore.System.Secret = cs2.R1CSCore.System.Secret           // Todo
-					cs.R1CSCore.System.Logs = cs2.R1CSCore.System.Logs               // Todo
-					cs.R1CSCore.System.DebugInfo = cs2.R1CSCore.System.DebugInfo     // Todo
-					cs.R1CSCore.System.SymbolTable = cs2.R1CSCore.System.SymbolTable // Todo
-					cs.R1CSCore.System.MDebug = cs2.R1CSCore.System.MDebug           // Todo
+					cs.R1CSCore.System.Public = make([]string, len(cs2.R1CSCore.System.Public))
+					cs.R1CSCore.System.Secret = make([]string, len(cs2.R1CSCore.System.Secret))
+					if _, ok := os.LookupEnv("GNARK_DEBUG_INFO"); ok {
+						cs.R1CSCore.System.Public = cs2.R1CSCore.System.Public
+						cs.R1CSCore.System.Secret = cs2.R1CSCore.System.Secret
+						cs.R1CSCore.System.Logs = cs2.R1CSCore.System.Logs
+						cs.R1CSCore.System.DebugInfo = cs2.R1CSCore.System.DebugInfo
+						cs.R1CSCore.System.SymbolTable = cs2.R1CSCore.System.SymbolTable
+						cs.R1CSCore.System.MDebug = cs2.R1CSCore.System.MDebug
+					}
 
 					cs.R1CSCore.System.NbHintFnWires = cs2.R1CSCore.System.NbHintFnWires
 					cs.R1CSCore.System.NbHintFnInputs = cs2.R1CSCore.System.NbHintFnInputs

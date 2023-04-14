@@ -20,7 +20,13 @@
 package groth16
 
 import (
+	"bufio"
+	"encoding/gob"
 	"fmt"
+	"io"
+	"os"
+	"sync"
+
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/backend"
 	"github.com/consensys/gnark/backend/witness"
@@ -32,8 +38,6 @@ import (
 	cs_bn254 "github.com/consensys/gnark/constraint/bn254"
 	cs_bw6633 "github.com/consensys/gnark/constraint/bw6-633"
 	cs_bw6761 "github.com/consensys/gnark/constraint/bw6-761"
-	"io"
-	"os"
 
 	fr_bls12377 "github.com/consensys/gnark-crypto/ecc/bls12-377/fr"
 	fr_bls12381 "github.com/consensys/gnark-crypto/ecc/bls12-381/fr"

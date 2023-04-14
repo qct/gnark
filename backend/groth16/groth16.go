@@ -20,12 +20,9 @@
 package groth16
 
 import (
-	"bufio"
-	"encoding/gob"
 	"fmt"
 	"io"
 	"os"
-	"sync"
 
 	"github.com/consensys/gnark-crypto/ecc"
 	"github.com/consensys/gnark/backend"

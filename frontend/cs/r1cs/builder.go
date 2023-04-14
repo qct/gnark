@@ -478,8 +478,15 @@ func (builder *builder) RecordConstraintsForLazy(key string, finished bool, s *[
 	builder.cs.AddStaticConstraints(key, builder.cs.GetNbConstraints(), finished, constraintExpressions)
 }
 
-func (builder *builder) AddGKRInputsAndOutputsMarks(inputs []frontend.Variable, outputs []frontend.Variable) {
+func (builder *builder) AddGKRInputsAndOutputsMarks(inputs []frontend.Variable, outputs []frontend.Variable, initialHash frontend.Variable) {
 	meta := constraint.GkrMeta{}
+
+	// constraint linear expression to get the normal value in the solving
+	vi := builder.cs.AddInternalVariable()
+	O := constraint.LinearExpression{builder.cs.MakeTerm(&builder.tOne, vi)}
+	builder.cs.AddConstraint(constraint.R1C{L: builder.getLinearExpression(builder.toVariable(initialHash)), R: builder.getLinearExpression(builder.cstOne()), O: O})
+	meta.GKRInitialHashVID = O[0].VID
+
 	meta.GKRConstraintsPos = builder.cs.GetNbConstraints()
 	GKRInputTables, _ := builder.toVariables(inputs...)
 	GKROutputTables, _ := builder.toVariables(outputs...)

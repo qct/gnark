@@ -54,6 +54,7 @@ type GkrMeta struct {
 	GKROutputTables   []LinearExpression
 	GKRConstraintsLvl int // record the lvl
 	GKRBN             int
+	GKRInitialHashVID uint32
 }
 
 // R1CS describes a set of R1C constraint
@@ -70,6 +71,9 @@ func (r1cs *R1CSCore) SetGKRMeta(meta GkrMeta) {
 	r1cs.GKRMeta.GKROutputTables = append(r1cs.GKRMeta.GKROutputTables, meta.GKROutputTables...)
 	r1cs.GKRMeta.GKRConstraintsPos = meta.GKRConstraintsPos
 	r1cs.GKRMeta.GKRBN = meta.GKRBN
+	if r1cs.GKRMeta.GKRInitialHashVID == 0 {
+		r1cs.GKRMeta.GKRInitialHashVID = meta.GKRInitialHashVID
+	}
 }
 
 func (r1cs *R1CSCore) FinalizeGKR() {

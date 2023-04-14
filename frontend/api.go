@@ -134,5 +134,5 @@ type API interface {
 	// @Params s is the inputs and same order with the repeatable structure
 	RecordConstraintsForLazy(key string, finished bool, s *[]Variable)
 
-	AddGKRInputsAndOutputsMarks(inputs []Variable, outputs []Variable)
+	AddGKRInputsAndOutputsMarks(inputs []Variable, outputs []Variable, initialHash Variable)
 }

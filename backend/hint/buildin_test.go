@@ -9,16 +9,10 @@ import (
 	"testing"
 )
 
-func TestFsdf(t *testing.T) {
-	s := []int{1, 2, 3}
-	s1 := s[0:1]
-	fmt.Println(s1)
-}
-
 func TestComputeMimc2Hash(t *testing.T) {
 	inputs := []*big.Int{big.NewInt(0), big.NewInt(1)}
 	results := []*big.Int{big.NewInt(0)}
-	err := MIMC2Elements(ecc.BN254, inputs, results)
+	err := MIMC2Elements(ecc.BN254.ScalarField(), inputs, results)
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -32,12 +26,12 @@ func TestComputeMimc2Hash(t *testing.T) {
 func TestGeneralMimc(t *testing.T) {
 	inputs := []*big.Int{big.NewInt(1), big.NewInt(2), big.NewInt(3)}
 	results := []*big.Int{big.NewInt(0)}
-	_ = MIMC2Elements(ecc.BN254, inputs, results)
-	_ = MIMC2Elements(ecc.BN254, []*big.Int{results[0], big.NewInt(3)}, results)
+	_ = MIMC2Elements(ecc.BN254.ScalarField(), inputs, results)
+	_ = MIMC2Elements(ecc.BN254.ScalarField(), []*big.Int{results[0], big.NewInt(3)}, results)
 	fmt.Printf("result:%x\n", results[0].Bytes())
 
 	results2 := []*big.Int{big.NewInt(0)}
-	_ = MIMCElements(ecc.BN254, inputs, results2)
+	_ = MIMCElements(ecc.BN254.ScalarField(), inputs, results2)
 	fmt.Printf("result2:%x\n", results2[0].Bytes())
 	assert.Equal(t, results[0].Bytes(), results2[0].Bytes())
 }
@@ -45,7 +39,7 @@ func TestGeneralMimc(t *testing.T) {
 func TestComputeMimcHash(t *testing.T) {
 	inputs := []*big.Int{big.NewInt(0), big.NewInt(1), big.NewInt(2)}
 	results := []*big.Int{big.NewInt(0)}
-	_ = MIMCElements(ecc.BN254, inputs, results)
+	_ = MIMCElements(ecc.BN254.ScalarField(), inputs, results)
 	fmt.Printf("result:%x\n", results[0].Bytes())
 
 	results2 := GMimcBigInts(inputs[0], inputs[1], inputs[2])

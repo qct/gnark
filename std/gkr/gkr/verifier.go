@@ -1,10 +1,13 @@
 package gkr
 
 import (
+	"fmt"
+	fiatshamir "github.com/consensys/gnark-crypto/fiat-shamir"
 	"github.com/consensys/gnark/std/gkr/circuit"
 	"github.com/consensys/gnark/std/gkr/common"
 	"github.com/consensys/gnark/std/gkr/polynomial"
 	"github.com/consensys/gnark/std/gkr/sumcheck"
+	"github.com/consensys/gnark/std/hash/poseidon"
 
 	"github.com/consensys/gnark-crypto/ecc/bn254/fr"
 )
@@ -27,11 +30,22 @@ func NewVerifier(bN int, circuit circuit.Circuit) Verifier {
 func (v *Verifier) Verify(
 	proof Proof,
 	inputs, outputs [][]fr.Element,
+	initialHash *fr.Element,
+	challenges ...string,
 ) bool {
 
 	nLayers := len(v.circuit.Layers)
 
-	qPrime, q := GetInitialQPrimeAndQAndInput(v.bN, v.circuit.Layers[nLayers-1].BGOutputs, inputs[0])
+	// Initial round, here we use the inputs layer as randomness, for specific inputs, we got specific assignment
+	qPrime, q := GetInitialQPrimeAndQAndInitialHash(v.bN, v.circuit.Layers[nLayers-1].BGOutputs, initialHash)
+	transcript := fiatshamir.NewTranscript(poseidon.NewPoseidon(), challenges...)
+	qqPrime := append(q, qPrime...)
+	bytes := make([]byte, 0)
+	for i := range qqPrime {
+		qqPrimeBytes := qqPrime[i].Bytes()
+		bytes = append(bytes, qqPrimeBytes[:]...)
+	}
+	transcript.Bind(challenges[0], bytes)
 	var qL, qR []fr.Element
 
 	claim := polynomial.EvaluateChunked(
@@ -43,7 +57,7 @@ func (v *Verifier) Verify(
 	valid, nextQPrime, nextQL, nextQR, totalClaim := sumcheckVerifier.Verify(
 		claim,
 		proof.SumcheckProofs[nLayers-1],
-		v.bN, v.circuit.Layers[nLayers-1].BGInputs,
+		v.bN, v.circuit.Layers[nLayers-1].BGInputs, nLayers-1, &transcript,
 	)
 
 	if !valid {
@@ -68,7 +82,8 @@ func (v *Verifier) Verify(
 		// Compute the random linear comb of the claims
 		var lambdaL fr.Element
 		lambdaL.SetOne()
-		lambdaR := common.GetChallenge([]fr.Element{proof.ClaimsLeft[layer+1], proof.ClaimsRight[layer+1]})
+		challengeName := fmt.Sprintf("layers.%d.next", layer)
+		lambdaR := common.GetChallengeByTranscript([]fr.Element{proof.ClaimsLeft[layer+1], proof.ClaimsRight[layer+1]}, &transcript, challengeName)
 		claim = proof.ClaimsRight[layer+1]
 		claim.Mul(&claim, &lambdaR)
 		claim.Add(&claim, &proof.ClaimsLeft[layer+1])
@@ -80,7 +95,7 @@ func (v *Verifier) Verify(
 
 		valid, nextQPrime, nextQL, nextQR, totalClaim = sumcheckVerifier.Verify(
 			claim, proof.SumcheckProofs[layer],
-			v.bN, v.circuit.Layers[layer].BGInputs,
+			v.bN, v.circuit.Layers[layer].BGInputs, layer, &transcript,
 		)
 		if !valid {
 			// The sumcheck proof is broken

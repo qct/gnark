@@ -49,9 +49,10 @@ func (p *Proof) AssertValid(
 	vInput, vOutput polynomial.MultilinearByValues,
 	qPrimeInitial []frontend.Variable,
 	qInitial []frontend.Variable,
+	initialHash frontend.Variable,
 ) {
 	// record the gkr start position
-	cs.AddGKRInputsAndOutputsMarks(vInput.Table, vOutput.Table)
+	cs.AddGKRInputsAndOutputsMarks(vInput.Table, vOutput.Table, initialHash)
 	qqPrime := append(append([]frontend.Variable{}, qInitial...), qPrimeInitial...)
 	claim := vOutput.Eval(cs, qqPrime)
 	challenges := make([]string, 0)

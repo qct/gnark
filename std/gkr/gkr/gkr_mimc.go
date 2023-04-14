@@ -5,6 +5,7 @@ import (
 	"github.com/consensys/gnark/frontend"
 	"github.com/consensys/gnark/std/gkr/snark/gkr"
 	"github.com/consensys/gnark/std/gkr/snark/polynomial"
+	"github.com/consensys/gnark/std/hash/poseidon"
 )
 
 type GkrCircuitSlice struct {
@@ -23,10 +24,10 @@ func (g *GkrCircuit) AllocateGKRCircuit(bN int) {
 }
 
 func (g *GkrCircuit) AssertValid(api frontend.API, committedVariable ...frontend.Variable) error {
-	initialHash := 0
+	initialHash := poseidon.Poseidon(api, committedVariable...)
 	qPrimeInitial, qInitial := gkr.GetInitialQPrimeAndQAndInitialHash(api, g[0].bN, 0, initialHash)
 	for _, c := range g {
-		c.Proof.AssertValid(api, c.Circuit, c.VInput, c.VOutput, qPrimeInitial, qInitial)
+		c.Proof.AssertValid(api, c.Circuit, c.VInput, c.VOutput, qPrimeInitial, qInitial, initialHash)
 	}
 	return nil
 }
@@ -69,6 +70,6 @@ func (c *GkrCircuitSlice) Assign(
 func (c *GkrCircuitSlice) Define(cs frontend.API) error {
 	initialHash, _ := cs.Compiler().Commit(c.VOutput.Table...)
 	qPrimeInitial, qInitial := gkr.GetInitialQPrimeAndQAndInitialHash(cs, c.bN, 0, initialHash)
-	c.Proof.AssertValid(cs, c.Circuit, c.VInput, c.VOutput, qPrimeInitial, qInitial)
+	c.Proof.AssertValid(cs, c.Circuit, c.VInput, c.VOutput, qPrimeInitial, qInitial, initialHash)
 	return nil
 }

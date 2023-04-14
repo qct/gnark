@@ -2,8 +2,8 @@ github.com/DmitriyVTitov/size v1.5.0 h1:/PzqxYrOyOUX1BXj6J9OuVRVGe+66VL4D9FlUaW5
 github.com/DmitriyVTitov/size v1.5.0/go.mod h1:le6rNI4CoLQV1b9gzp1+3d7hMAD/uu2QcJ+aYbNgiU0=
 github.com/blang/semver/v4 v4.0.0 h1:1PFHFE6yCCTv8C1TeyNNarDzntLi7wMI5i/pzqYIsAM=
 github.com/blang/semver/v4 v4.0.0/go.mod h1:IbckMUScFkM3pff0VJDNKRiT6TG/YpiHIM2yvyW5YoQ=
-github.com/bnb-chain/gnark-crypto v0.8.1-0.20230403113149-df3525fa8c14 h1:lOqa4fHavCKnvaJnwGB0qjVrJL5jvmy8KrEDpO7InpU=
-github.com/bnb-chain/gnark-crypto v0.8.1-0.20230403113149-df3525fa8c14/go.mod h1:a2DQL4+5ywF6safEeZFEPGRiiGbjzGFRUN2sg06VuU4=
+github.com/bnb-chain/gnark-crypto v0.8.1-0.20230412061827-228166c33652 h1:M0T89FK94h8iDt12anZE4D6YCWHMUJbOANVnjtwif7A=
+github.com/bnb-chain/gnark-crypto v0.8.1-0.20230412061827-228166c33652/go.mod h1:a2DQL4+5ywF6safEeZFEPGRiiGbjzGFRUN2sg06VuU4=
 github.com/btcsuite/btcd/btcec/v2 v2.2.0 h1:fzn1qaOt32TuLjFlkzYSsBC35Q3KUjT1SwPxiMSCF5k=
 github.com/btcsuite/btcd/btcec/v2 v2.2.0/go.mod h1:U7MHm051Al6XmscBQ0BoNydpOTsFAn707034b5nY8zU=
 github.com/btcsuite/btcd/chaincfg/chainhash v1.0.1 h1:q0rUy8C/TYNBQS1+CGKw68tLOFYSNEs0TFnxxnS9+4U=

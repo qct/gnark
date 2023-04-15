@@ -3,7 +3,6 @@ module github.com/consensys/gnark
 go 1.18
 
 require (
-	github.com/DmitriyVTitov/size v1.5.0
 	github.com/blang/semver/v4 v4.0.0
 	github.com/consensys/bavard v0.1.13
 	github.com/consensys/gnark-crypto v0.9.1
